@@ -16,6 +16,15 @@ app.use(
 );
 app.use(express.json());
 
+// Middleware to check API key
+const apiKeyMiddleware = (req, res, next) => {
+  const apiKey = req.headers["x-api-key"];
+  if (!apiKey || apiKey !== process.env.API_KEY) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  next();
+};
+
 // Set VAPID details
 webpush.setVapidDetails(
   "mailto:your-email@example.com",
@@ -25,7 +34,7 @@ webpush.setVapidDetails(
 
 let subscriptions = [];
 
-// Register subscription
+// Register subscription (public for clients)
 app.post("/register", (req, res) => {
   const { subscription } = req.body;
   if (subscription) {
@@ -37,8 +46,8 @@ app.post("/register", (req, res) => {
   }
 });
 
-// Send notification
-app.post("/notify", async (req, res) => {
+// Send notification (protected for scripts/backends)
+app.post("/notify", apiKeyMiddleware, async (req, res) => {
   const { title, body } = req.body;
   const payload = JSON.stringify({ title, body });
 
