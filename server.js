@@ -7,6 +7,8 @@ const path = require("path");
 
 const app = express();
 
+const MAX_SUBSCRIPTIONS = parseInt(process.env.MAX_SUBSCRIPTIONS) || 0;
+
 // Configure CORS to allow specific origins
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
@@ -61,6 +63,10 @@ const saveSubscriptions = () => {
 app.post("/register", (req, res) => {
   const { subscription } = req.body;
   if (subscription) {
+    if (subscriptions.length >= MAX_SUBSCRIPTIONS) {
+      return res.status(429).json({ error: "Subscription limit reached" });
+    }
+
     subscriptions.push(subscription);
     saveSubscriptions(); // Persist to file
     console.log("Subscription registered. Total:", subscriptions.length);
