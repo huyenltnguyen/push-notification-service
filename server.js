@@ -2,6 +2,8 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const webpush = require("web-push");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
 
@@ -32,13 +34,35 @@ webpush.setVapidDetails(
   process.env.VAPID_PRIVATE_KEY
 );
 
+// File to store subscriptions
+const subscriptionsFile = path.join(__dirname, "subscriptions.json");
+
+// Load subscriptions from file
 let subscriptions = [];
+try {
+  if (fs.existsSync(subscriptionsFile)) {
+    const data = fs.readFileSync(subscriptionsFile, "utf8");
+    subscriptions = JSON.parse(data);
+  }
+} catch (error) {
+  console.error("Error loading subscriptions:", error);
+}
+
+// Function to save subscriptions to file
+const saveSubscriptions = () => {
+  try {
+    fs.writeFileSync(subscriptionsFile, JSON.stringify(subscriptions, null, 2));
+  } catch (error) {
+    console.error("Error saving subscriptions:", error);
+  }
+};
 
 // Register subscription (public for clients)
 app.post("/register", (req, res) => {
   const { subscription } = req.body;
   if (subscription) {
     subscriptions.push(subscription);
+    saveSubscriptions(); // Persist to file
     console.log("Subscription registered. Total:", subscriptions.length);
     res.json({ message: "Subscription registered" });
   } else {
