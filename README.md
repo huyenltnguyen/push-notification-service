@@ -7,7 +7,7 @@ Minimal web-push server for sending notifications.
 1. Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 2. Generate VAPID keys:
@@ -32,7 +32,7 @@ VAPID_PRIVATE_KEY=your_generated_private_key
 5. Run locally:
 
 ```bash
-npm start
+pnpm start
 ```
 
 ## Endpoints
