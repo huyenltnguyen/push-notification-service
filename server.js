@@ -4,7 +4,16 @@ const cors = require("cors");
 const webpush = require("web-push");
 
 const app = express();
-app.use(cors());
+
+// Configure CORS to allow specific origins
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",")
+  : ["*"];
+app.use(
+  cors({
+    origin: allowedOrigins,
+  })
+);
 app.use(express.json());
 
 // Set VAPID details
@@ -45,7 +54,7 @@ app.post("/notify", async (req, res) => {
   res.json({ message: "Notifications sent", count: subscriptions.length });
 });
 
-// Health check
+// Health check (public, for Koyeb)
 app.get("/health", (req, res) => {
   res.json({ status: "ok", subscriptions: subscriptions.length });
 });
