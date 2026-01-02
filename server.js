@@ -67,6 +67,14 @@ app.post("/register", (req, res) => {
       return res.status(429).json({ error: "Subscription limit reached" });
     }
 
+    // Check if subscription already exists
+    const exists = subscriptions.some(
+      (sub) => sub.endpoint === subscription.endpoint
+    );
+    if (exists) {
+      return res.json({ message: "Subscription already registered" });
+    }
+
     subscriptions.push(subscription);
     saveSubscriptions(); // Persist to file
     console.log("Subscription registered. Total:", subscriptions.length);
